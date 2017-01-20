@@ -326,6 +326,12 @@ Transform:
   m_PrefabParentObject: {fileID: 4550652800140168, guid: fce5ad66cbb4c460b86bb875c8b325f9,
     type: 2}
   m_PrefabInternal: {fileID: 307641220}
+--- !u!114 &213556841 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 114336397851416274, guid: fce5ad66cbb4c460b86bb875c8b325f9,
+    type: 2}
+  m_PrefabInternal: {fileID: 307641220}
+  m_Script: {fileID: 11500000, guid: 44c5dbc847bc1d1499e9b675ffc5da14, type: 3}
 --- !u!1001 &307641220
 Prefab:
   m_ObjectHideFlags: 0
@@ -367,7 +373,12 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1742044879884076, guid: fce5ad66cbb4c460b86bb875c8b325f9, type: 2}
       propertyPath: m_Name
-      value: Audio Source
+      value: Station20
+      objectReference: {fileID: 0}
+    - target: {fileID: 114336397851416274, guid: fce5ad66cbb4c460b86bb875c8b325f9,
+        type: 2}
+      propertyPath: stationBandwidth
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: fce5ad66cbb4c460b86bb875c8b325f9, type: 2}
@@ -802,9 +813,10 @@ MonoBehaviour:
   frequencyNotch: {fileID: 973921616}
   frequencyText: {fileID: 1644128866}
   stations:
-  - {fileID: 0}
+  - {fileID: 213556841}
   staticSource: {fileID: 1465237782}
   radioStatic: {fileID: 8300000, guid: fdde208188984f045823c64f87d2909b, type: 3}
+  currentFrequency: 0
 --- !u!4 &1465237784
 Transform:
   m_ObjectHideFlags: 0
