@@ -12,16 +12,15 @@ public class DialController : MonoBehaviour
     public Text frequencyText;
 
     //Sounds
-    public AudioSource[] stationSources;
-    public int[] stations; //There MUST be the same amount of stationSources as there are stations and put them in the correct order to get the correct station playing on the station wanted
+    public StationController[] stations;
     public AudioSource staticSource;
-    public AudioClip radioStatic;    
+    public AudioClip radioStatic;
 
     //Privates
     private float notchXPosition = -4.0f;
     private float waitForHoldTimer = 0;
     private float tuneSpeed = 1;
-    private int currentFrequency;
+    public int currentFrequency;
 
     void Start()
     {
@@ -113,7 +112,7 @@ public class DialController : MonoBehaviour
         }
     }
 
-    void UpdateFrequency()
+    public void UpdateFrequency()
     {
 
         //calculate correct notch position
@@ -148,51 +147,53 @@ public class DialController : MonoBehaviour
 
         for (int i = 0; i < stations.Length; i++)
         {
-            if (frequency > stations[i] - 5 && frequency < stations[i] + 5) //Check if close to a radio station
+            print(string.Format("frequency: {0}, sationFrequency: {1}", frequency, stations[i].frequency));
+            if (frequency > stations[i].frequency - 5 && frequency < stations[i].frequency + 5) //Check if close to a radio station
             {
-                if (frequency == stations[i]) //Are we right on the station
+                if (frequency == stations[i].frequency) //Are we right on the station
                 {
-                    stationSources[i].volume = 1;
+                    print("full volume");
+                    stations[i].getSource().volume = 1;
                 }
-                else if (frequency > stations[i] - 5 && frequency < stations[i])
+                else if (frequency > stations[i].frequency - 5 && frequency < stations[i].frequency)
                 {
-                    switch (stations[i] - frequency) //How close to the station are we?
+                    switch (stations[i].frequency - frequency) //How close to the station are we?
                     {
-                        case 1:
-                            stationSources[i].volume = 0.4f;
-                            break;
-                        case 2:
-                            stationSources[i].volume = 0.3f;
-                            break;
-                        case 3:
-                            stationSources[i].volume = 0.2f;
-                            break;
-                        case 4:
-                            stationSources[i].volume = 0.1f;
-                            break;
-                        default:
-                            stationSources[i].volume = 0.0f;
-                            break;
+                      case 1:
+                          stations[i].getSource().volume = 0.4f;
+                          break;
+                      case 2:
+                          stations[i].getSource().volume = 0.3f;
+                          break;
+                      case 3:
+                          stations[i].getSource().volume = 0.2f;
+                          break;
+                      case 4:
+                          stations[i].getSource().volume = 0.1f;
+                          break;
+                      default:
+                          stations[i].getSource().volume = 0.0f;
+                          break;
                     }
                 }
                 else
                 {
-                    switch (frequency - stations[i])//How close to the station are we?
+                    switch (frequency - stations[i].frequency)//How close to the station are we?
                     {
                         case 1:
-                            stationSources[i].volume = 0.4f;
+                            stations[i].getSource().volume = 0.4f;
                             break;
                         case 2:
-                            stationSources[i].volume = 0.3f;
+                            stations[i].getSource().volume = 0.3f;
                             break;
                         case 3:
-                            stationSources[i].volume = 0.2f;
+                            stations[i].getSource().volume = 0.2f;
                             break;
                         case 4:
-                            stationSources[i].volume = 0.1f;
+                            stations[i].getSource().volume = 0.1f;
                             break;
                         default:
-                            stationSources[i].volume = 0.0f;
+                            stations[i].getSource().volume = 0.0f;
                             break;
                     }
                 }
@@ -200,24 +201,26 @@ public class DialController : MonoBehaviour
             else
             {
                 //Not near a station
-                stationSources[i].volume = 0;
+                stations[i].getSource().volume = 0.0f;
             }
         }
         float tempHeighestVolume = 0;
         for (int i = 0; i < stations.Length; i++)
         {
-            if(stationSources[i].volume > 0)
+
+          print(string.Format("Current station volume: {0}", stations[i].getSource().volume));
+            if(stations[i].getSource().volume > 0)
             {
-                if (stationSources[i].volume > tempHeighestVolume) //Keep a value of the current highest volume station
+                if (stations[i].getSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
                 {
-                    tempHeighestVolume = stationSources[i].volume;
+                    tempHeighestVolume = stations[i].getSource().volume;
                 }
-            }            
+            }
         }
         //Set the static volume
         staticSource.volume = 1 - tempHeighestVolume;
 
     }
 
-    
+
 }
