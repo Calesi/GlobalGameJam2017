@@ -196,8 +196,6 @@ public class DialController : MonoBehaviour
                             break;
                     }
                 }
-                //A station has been found, break out so as to not waste time
-                break;
             }
             else
             {
@@ -205,22 +203,20 @@ public class DialController : MonoBehaviour
                 stationSources[i].volume = 0;
             }
         }
+        float tempHeighestVolume = 0;
         for (int i = 0; i < stations.Length; i++)
         {
             if(stationSources[i].volume > 0)
             {
-                //Set the static volume then break to not change volume(will change to have multiple stations playing similtaniously)
-                staticSource.volume = 1 - stationSources[i].volume;
-                break;
-            }
-            else
-            {
-                //No Station is playing
-                staticSource.volume = 1;
-            }
-            
+                if (stationSources[i].volume > tempHeighestVolume) //Keep a value of the current highest volume station
+                {
+                    tempHeighestVolume = stationSources[i].volume;
+                }
+            }            
         }
-        
+        //Set the static volume
+        staticSource.volume = 1 - tempHeighestVolume;
+
     }
 
     
