@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -162,26 +162,26 @@ public class DialController : MonoBehaviour
         if (frequency == stations[i].frequency) //Are we right on the station
         {
           print("full volume");
-          stations[i].getSource().volume = 1;
+          stations[i].GetSource().volume = 1;
         }
         else if (frequency > stations[i].frequency - stationBandwidth && frequency < stations[i].frequency)
         {
           switch (stations[i].frequency - frequency) //How close to the station are we?
           {
             case 1:
-            stations[i].getSource().volume = 0.4f;
+            stations[i].GetSource().volume = 0.4f;
             break;
             case 2:
-            stations[i].getSource().volume = 0.3f;
+            stations[i].GetSource().volume = 0.3f;
             break;
             case 3:
-            stations[i].getSource().volume = 0.2f;
+            stations[i].GetSource().volume = 0.2f;
             break;
             case 4:
-            stations[i].getSource().volume = 0.1f;
+            stations[i].GetSource().volume = 0.1f;
             break;
             default:
-            stations[i].getSource().volume = 0.0f;
+            stations[i].GetSource().volume = 0.0f;
             break;
           }
         }
@@ -190,19 +190,19 @@ public class DialController : MonoBehaviour
           switch (frequency - stations[i].frequency)//How close to the station are we?
           {
             case 1:
-            stations[i].getSource().volume = 0.4f;
+            stations[i].GetSource().volume = 0.4f;
             break;
             case 2:
-            stations[i].getSource().volume = 0.3f;
+            stations[i].GetSource().volume = 0.3f;
             break;
             case 3:
-            stations[i].getSource().volume = 0.2f;
+            stations[i].GetSource().volume = 0.2f;
             break;
             case 4:
-            stations[i].getSource().volume = 0.1f;
+            stations[i].GetSource().volume = 0.1f;
             break;
             default:
-            stations[i].getSource().volume = 0.0f;
+            stations[i].GetSource().volume = 0.0f;
             break;
           }
         }
@@ -210,19 +210,19 @@ public class DialController : MonoBehaviour
       else
       {
         //Not near a station
-        stations[i].getSource().volume = 0.0f;
+        stations[i].GetSource().volume = 0.0f;
       }
     }
     float tempHeighestVolume = 0;
     for (int i = 0; i < stations.Length; i++)
     {
 
-      print(string.Format("Current station volume: {0}", stations[i].getSource().volume));
-      if(stations[i].getSource().volume > 0)
+      print(string.Format("Current station volume: {0}", stations[i].GetSource().volume));
+      if(stations[i].GetSource().volume > 0)
       {
-        if (stations[i].getSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
+        if (stations[i].GetSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
         {
-          tempHeighestVolume = stations[i].getSource().volume;
+          tempHeighestVolume = stations[i].GetSource().volume;
         }
       }
     }
