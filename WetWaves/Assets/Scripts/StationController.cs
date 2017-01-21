@@ -55,7 +55,7 @@ public class StationController : MonoBehaviour
                 currentClip = i + 1;
             }
         }
-        if (currentClip == stationClips.Length)
+        if (currentClip >= stationClips.Length)
         {
             currentClip = 0;
         }
