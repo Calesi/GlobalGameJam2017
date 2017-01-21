@@ -2178,7 +2178,7 @@ MonoBehaviour:
   - {fileID: 1995867508}
   staticSource: {fileID: 1547776832}
   radioStatic: {fileID: 8300000, guid: 6ab3dc386827a674f8baff5d941a1cd9, type: 3}
-  currentFrequency: 343
+  currentFrequency: 452
 --- !u!4 &1547776831
 Transform:
   m_ObjectHideFlags: 0
@@ -3051,7 +3051,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a7f065e18a480e47997a97fb63d800f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  recording: 0
   buttons:
   - {fileID: 1690374834}
   - {fileID: 1279970376}
@@ -3076,7 +3075,8 @@ MonoBehaviour:
   - {fileID: 134659194}
   - {fileID: 1196007379}
   source: {fileID: 0}
-  sourceClips: []
+  sourceClips:
+  - {fileID: 8300000, guid: fdde208188984f045823c64f87d2909b, type: 3}
   currentClip: 0
 --- !u!4 &1898023034
 Transform:
@@ -3101,9 +3101,9 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: fdde208188984f045823c64f87d2909b, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0
   m_Pitch: 1
   Loop: 0
   Mute: 0

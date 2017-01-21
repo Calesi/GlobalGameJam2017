@@ -7,7 +7,6 @@ public class TapeRecorder : MonoBehaviour
 
     public static TapeRecorder instance;
 
-    public bool recording = false;
     private bool playing = false;
     public GameObject[] buttons;
     private int currentButton = 3;
@@ -107,7 +106,11 @@ public class TapeRecorder : MonoBehaviour
 
                             switch (i)
                             {
-                                case 0: //Record   
+                                case 0: //Record 
+                                    if (currentButton == 1 && !playing)
+                                    {
+                                        buttons[currentButton].transform.Translate(new Vector3(0, -0.075f, 0));
+                                    }
                                     playing = false;
                                     timestamp = 0;
                                     for (int k = 0; k < sourceClips.Count; k++)
@@ -141,11 +144,19 @@ public class TapeRecorder : MonoBehaviour
                                     }
                                     break;
                                 case 2: //Stop
+                                    if(currentButton == 1 && !playing)
+                                    {
+                                        buttons[currentButton].transform.Translate(new Vector3(0, -0.075f, 0));
+                                    }
                                     playing = false;
                                     timestamp = source.time;
                                     source.Stop();
                                     break;
                                 case 3: //Rewind
+                                    if (currentButton == 1 && !playing)
+                                    {
+                                        buttons[currentButton].transform.Translate(new Vector3(0, -0.075f, 0));
+                                    }
                                     currentClip = 0;
                                     playing = false;
                                     timestamp = 0;
@@ -156,10 +167,6 @@ public class TapeRecorder : MonoBehaviour
                             }
                             currentButton = i;
                             buttons[currentButton].transform.Translate(new Vector3(0, -0.075f, 0));
-                        }
-                        if(buttons[i].transform.position.y > -2.75)
-                        {
-                            buttons[i].transform.position = new Vector3(buttons[i].transform.position.x, - 2.75f, buttons[i].transform.position.z);
                         }
                     }
                 }
