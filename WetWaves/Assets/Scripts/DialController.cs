@@ -147,6 +147,39 @@ public class DialController : MonoBehaviour
     {
       waitForHoldTimer = 0;
     }
+    if (Input.GetKeyDown(KeyCode.S)) //Tapped
+    {
+      if (masterVolume >= 0f)
+      {
+        dialRight.transform.Rotate(new Vector3(0, 1, 0), 10, Space.Self);
+        masterVolume -= volumeIncrement;
+      }
+      else
+      {
+        masterVolume = 0f;
+      }
+    }
+    else if (Input.GetKey(KeyCode.S)) //Held
+    {
+      if (masterVolume >= 0f)
+      {
+        //Wait a short delay to start fast tuning
+        waitForHoldTimer += Time.deltaTime;
+        if (waitForHoldTimer > 0.2f)
+        {
+          dialRight.transform.Rotate(new Vector3(0, 1, 0), 10, Space.Self);
+          masterVolume -= (int)volumeIncrement;
+        }
+      }
+      else
+      {
+        masterVolume = 0f;
+      }
+    }
+    if (Input.GetKeyUp(KeyCode.S)) //Reset fast timer
+    {
+      waitForHoldTimer = 0;
+    }
   }
 
   public void UpdateFrequency()
