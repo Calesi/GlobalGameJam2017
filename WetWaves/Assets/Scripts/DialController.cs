@@ -40,7 +40,7 @@ public class DialController : MonoBehaviour
   {
 
     //Check if single tap or held
-    if (Input.GetKeyDown(KeyCode.A)) //Tapped
+    if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) //Tapped
     {
       if (currentFrequency >= 1)
       {
@@ -53,7 +53,7 @@ public class DialController : MonoBehaviour
       }
       UpdateFrequency();
     }
-    else if (Input.GetKey(KeyCode.A)) //Held
+    else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) //Held
     {
       if (currentFrequency >= 1)
       {
@@ -71,13 +71,13 @@ public class DialController : MonoBehaviour
       }
       UpdateFrequency();
     }
-    if (Input.GetKeyUp(KeyCode.A)) //Reset fast timer
+    if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) //Reset fast timer
     {
       waitForHoldTimer = 0;
     }
 
     //Check if single tap or held
-    if (Input.GetKeyDown(KeyCode.D)) //Tapped
+    if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) //Tapped
     {
       if (currentFrequency <= 799)
       {
@@ -90,7 +90,7 @@ public class DialController : MonoBehaviour
       }
       UpdateFrequency();
     }
-    else if (Input.GetKey(KeyCode.D)) //Held
+    else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) //Held
     {
       if (currentFrequency <= 799)
       {
@@ -108,13 +108,13 @@ public class DialController : MonoBehaviour
       }
       UpdateFrequency();
     }
-    if (Input.GetKeyUp(KeyCode.D)) //Reset fast timer
+    if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)) //Reset fast timer
     {
       waitForHoldTimer = 0;
     }
 
     /* VOLUME CONTROL */
-    if (Input.GetKeyDown(KeyCode.W)) //Tapped
+    if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) //Tapped
     {
       if (masterVolume <= 1.0f)
       {
@@ -126,7 +126,7 @@ public class DialController : MonoBehaviour
         masterVolume = 1.0f;
       }
     }
-    else if (Input.GetKey(KeyCode.W)) //Held
+    else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) //Held
     {
       if (masterVolume <= 1.0f)
       {
@@ -143,11 +143,11 @@ public class DialController : MonoBehaviour
         masterVolume = 1.0f;
       }
     }
-    if (Input.GetKeyUp(KeyCode.W)) //Reset fast timer
+    if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow)) //Reset fast timer
     {
       waitForHoldTimer = 0;
     }
-    if (Input.GetKeyDown(KeyCode.S)) //Tapped
+    if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) //Tapped
     {
       if (masterVolume >= 0f)
       {
@@ -159,7 +159,7 @@ public class DialController : MonoBehaviour
         masterVolume = 0f;
       }
     }
-    else if (Input.GetKey(KeyCode.S)) //Held
+    else if (Input.GetKey(KeyCode.S)|| Input.GetKey(KeyCode.DownArrow)) //Held
     {
       if (masterVolume >= 0f)
       {
@@ -176,7 +176,7 @@ public class DialController : MonoBehaviour
         masterVolume = 0f;
       }
     }
-    if (Input.GetKeyUp(KeyCode.S)) //Reset fast timer
+    if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)) //Reset fast timer
     {
       waitForHoldTimer = 0;
     }
