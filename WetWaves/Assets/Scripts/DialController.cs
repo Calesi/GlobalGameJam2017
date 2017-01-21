@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class DialController : MonoBehaviour
 {
     //Publics
+    public enum RadioEvent {None, PowerOn, StationChanged, VolumeChanged};
     public GameObject dialLeft;
     public GameObject dialRight;
     public GameObject frequencyNotch;
@@ -27,6 +28,7 @@ public class DialController : MonoBehaviour
     private readonly float percentStaticRand = 0.4f; //Larger means static volume is more randomised
 
     //Privates
+    private float staticVolModifier = 0.7f;
     private float notchXPosition = -4.0f;
     private float waitForHoldTimer = 0;
     public int currentFrequency;
@@ -37,19 +39,20 @@ public class DialController : MonoBehaviour
         currentFrequency = 0;
         masterVolume = defaultMasterVol;
         staticSource.volume = defaultMasterVol;
-        frequencyText.text = "80.0";
+        UpdateRadio(RadioEvent.PowerOn);
     }
 
     void Update()
     {
         if (!TapeRecorder.instance.recording)
         {
-            GetInput();
+        	RadioEvent eventType = GetInput();
+        	UpdateRadio(eventType);
         }
         
     }
 
-    void GetInput()
+    RadioEvent GetInput()
     {
 
         //Check if single tap or held
@@ -64,9 +67,7 @@ public class DialController : MonoBehaviour
             {
                 currentFrequency = 0;
             }
-            UpdateAudio(currentFrequency);
-            UpdateFrequency();
-            return;
+            return RadioEvent.StationChanged;
         }
         else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) //Held
         {
@@ -84,9 +85,7 @@ public class DialController : MonoBehaviour
             {
                 currentFrequency = 0;
             }
-            UpdateAudio(currentFrequency);
-            UpdateFrequency();
-            return;
+            return RadioEvent.StationChanged;
         }
         if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) //Reset fast timer
         {
@@ -105,9 +104,7 @@ public class DialController : MonoBehaviour
             {
                 currentFrequency = 800;
             }
-            UpdateAudio(currentFrequency);
-            UpdateFrequency();
-            return;
+            return RadioEvent.StationChanged;
         }
         else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) //Held
         {
@@ -125,9 +122,7 @@ public class DialController : MonoBehaviour
             {
                 currentFrequency = 800;
             }
-            UpdateAudio(currentFrequency);
-            UpdateFrequency();
-            return;
+            return RadioEvent.StationChanged;
         }
         if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)) //Reset fast timer
         {
@@ -146,7 +141,7 @@ public class DialController : MonoBehaviour
             {
                 masterVolume = 1.0f;
             }
-            return;
+            return RadioEvent.VolumeChanged;
         }
         else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) //Held
         {
@@ -164,7 +159,7 @@ public class DialController : MonoBehaviour
             {
                 masterVolume = 1.0f;
             }
-            return;
+            return RadioEvent.VolumeChanged;
         }
         if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow)) //Reset fast timer
         {
@@ -181,7 +176,7 @@ public class DialController : MonoBehaviour
             {
                 masterVolume = 0f;
             }
-            return;
+            return RadioEvent.VolumeChanged;
         }
         else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) //Held
         {
@@ -199,14 +194,32 @@ public class DialController : MonoBehaviour
             {
                 masterVolume = 0f;
             }
-            return;
+            return RadioEvent.VolumeChanged;
         }
         if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)) //Reset fast timer
         {
             waitForHoldTimer = 0;
         }
+        return RadioEvent.None;
     }
-
+    
+    public void UpdateRadio(RadioEvent eventType)
+    {
+    	if (eventType != RadioEvent.None) {
+    		UpdateFrequency();
+    		switch (eventType) {
+    			case RadioEvent.StationChanged:
+    				float tempHeighestVolume = UpdateAudio();
+		    		staticSource.volume = setStaticVol(tempHeighestVolume);
+		            staticSource.volume = randomiseStaticVol(staticSource.volume);
+		            break;
+	           case RadioEvent.VolumeChanged:
+		           UpdateAudio();
+		           break;
+    		}
+    	}
+    }
+    
     public void UpdateFrequency()
     {
 
@@ -215,6 +228,7 @@ public class DialController : MonoBehaviour
         notchXPosition /= 40;
         notchXPosition *= 0.22f;
         notchXPosition -= frequencyNotch.transform.position.x;
+        notchXPosition += transform.position.x;
         Vector3 pos = new Vector3(-notchXPosition, 0, 0);
         frequencyNotch.transform.Translate(pos);
 
@@ -227,25 +241,19 @@ public class DialController : MonoBehaviour
         frequencyText.text = displayFrequency.ToString("0.0");
     }
 
-    void UpdateAudio(int frequency)
+    float UpdateAudio()
     {
 
     	float tempHeighestVolume = 0;
         for (int i = 0; i < stations.Length; i++)
         {
-            var stationBandwidth = ToFrequencyRange(stations[i].stationBandwidth);
-            if (Convert.ToSingle(Math.Abs(stations[i].frequency - frequency)) <= stationBandwidth) //Check if close to a radio station
+            if (Convert.ToSingle(Math.Abs(stations[i].frequency - currentFrequency)) <= ToFrequencyRange(stations[i].stationBandwidth)) //Check if close to a radio station
             {
-                if (frequency == stations[i].frequency) //Are we right on the station
+                if (currentFrequency == stations[i].frequency) //Are we right on the station
                 {
                     stations[i].GetSource().volume = 1.0f * masterVolume;
                 } else {
-        //          float baseModifier = 0.1f;
-                    float exponent = (stationBandwidth - Convert.ToSingle(Math.Abs(stations[i].frequency - frequency)));
-                    float fraction = Convert.ToSingle(Math.Pow(interferenceBase, exponent)) - 1.0f;
-                    float outOf = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth)) - 1.0f;
-                    float percentageModifier = fraction / outOf;
-                    stations[i].GetSource().volume = (percentageModifier) * masterVolume;
+                    stations[i].GetSource().volume = setStationVol(stations[i], currentFrequency);
                 }
                 if (stations[i].GetSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
                 {
@@ -258,12 +266,24 @@ public class DialController : MonoBehaviour
                 stations[i].GetSource().volume = 0.0f * masterVolume;
             }
         }
-        //Set the static volume
-        staticSource.volume = 1 * masterVolume - tempHeighestVolume;
-        staticSource.volume = randomiseStatic(staticSource.volume);
+        return tempHeighestVolume;
     }
     
-    private float randomiseStatic(float staticVol) {
+    private float setStationVol (StationController station, int rawFrequency) {
+    	var stationBandwidth = ToFrequencyRange(station.stationBandwidth);
+//        float baseModifier = 0.1f;
+        float exponent = (stationBandwidth - Convert.ToSingle(Math.Abs(station.frequency - rawFrequency)));
+        float fraction = Convert.ToSingle(Math.Pow(interferenceBase, exponent)) - 1.0f;
+        float outOf = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth)) - 1.0f;
+        float percentageModifier = fraction / outOf;
+        return percentageModifier * masterVolume;
+    }
+    
+    private float setStaticVol(float vol) {
+    	return staticSource.volume = staticVolModifier * (masterVolume - vol);
+    }
+    
+    private float randomiseStaticVol(float staticVol) {
     	float randFloat = Convert.ToSingle(new System.Random().NextDouble());
     	float newStaticVol = staticVol * (1.0f - percentStaticRand) + staticVol * percentStaticRand * randFloat;
     	return newStaticVol;
