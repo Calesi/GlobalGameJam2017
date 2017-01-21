@@ -22,6 +22,7 @@ public class TapeRecorder : MonoBehaviour
     void Start()
     {
         source = GetComponent<AudioSource>();
+        currentButton = 5;
     }
 
     void Awake()
@@ -71,7 +72,7 @@ public class TapeRecorder : MonoBehaviour
         source.volume = 0;
         for (int i = 0; i < externalSources.Length; i++)
         {
-            if(externalSources[i].volume > externalSources[selectedStation].volume)
+            if (externalSources[i].volume > externalSources[selectedStation].volume)
             {
                 selectedStation = i;
                 source.volume = externalSources[selectedStation].volume;
@@ -96,12 +97,15 @@ public class TapeRecorder : MonoBehaviour
                 {
                     for (int i = 0; i < buttons.Length; i++)
                     {
+                        
                         if (buttons[i] == objectHit)
                         {
-                            buttons[currentButton].transform.Translate(new Vector3(0, 0, -0.25f));
-                            currentButton = i;
-                            buttons[currentButton].transform.Translate(new Vector3(0, 0, 0.25f));
-                            switch (currentButton)
+                            if (currentButton < 4)
+                            {
+                                buttons[currentButton].transform.Translate(new Vector3(0, 0.075f, 0));
+                            }
+
+                            switch (i)
                             {
                                 case 0: //Record   
                                     playing = false;
@@ -113,22 +117,36 @@ public class TapeRecorder : MonoBehaviour
                                     Record();
                                     source.Stop();
                                     break;
-                                case 1: //Play 
-                                    if (sourceClips.Count > 0)
+                                case 1: //Play and pause
+                                    if (!playing)
                                     {
-                                        playing = true;
-                                        source.clip = sourceClips[currentClip];
-                                        source.Play();
-                                        source.time = timestamp;
+                                        if (sourceClips.Count > 0)
+                                        {
+                                            if(currentButton == i)
+                                            {
+                                                buttons[currentButton].transform.Translate(new Vector3(0, -0.075f, 0));
+                                            }
+                                            playing = true;
+                                            source.clip = sourceClips[currentClip];
+                                            source.Play();
+                                            source.time = timestamp;
+                                        }
+                                    }
+                                    else if (currentButton == i && playing)
+                                    {
+                                        playing = false;
+                                        timestamp = source.time;
+                                        source.Stop();
+                                        buttons[currentButton].transform.Translate(new Vector3(0, 0.075f, 0));
                                     }
                                     break;
-                                case 2: //Pause
+                                case 2: //Stop
                                     playing = false;
-                                    currentClip = 0;
                                     timestamp = source.time;
                                     source.Stop();
                                     break;
                                 case 3: //Rewind
+                                    currentClip = 0;
                                     playing = false;
                                     timestamp = 0;
                                     source.Stop();
@@ -136,6 +154,12 @@ public class TapeRecorder : MonoBehaviour
                                 default:
                                     break;
                             }
+                            currentButton = i;
+                            buttons[currentButton].transform.Translate(new Vector3(0, -0.075f, 0));
+                        }
+                        if(buttons[i].transform.position.y > -2.75)
+                        {
+                            buttons[i].transform.position = new Vector3(buttons[i].transform.position.x, - 2.75f, buttons[i].transform.position.z);
                         }
                     }
                 }
