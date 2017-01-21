@@ -31,7 +31,7 @@ public class FrequencyButtons : MonoBehaviour {
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, 50.0f))
+            if (Physics.Raycast(ray, out hit, 500.0f))
             {
                 GameObject objectHit = hit.collider.gameObject;
                 if (objectHit.tag == "Button")
@@ -40,9 +40,9 @@ public class FrequencyButtons : MonoBehaviour {
                     {
                         if (buttons[i] == objectHit)
                         {
-                            buttons[currentButton].transform.Translate(new Vector3(0, 0, -0.25f));
+                            buttons[currentButton].transform.Translate(new Vector3(0, 0, 0.150f));
                             currentButton = i;
-                            buttons[currentButton].transform.Translate(new Vector3(0, 0, 0.25f));
+                            buttons[currentButton].transform.Translate(new Vector3(0, 0, -0.150f));
                             GetComponent<DialController>().currentFrequency = buttonFrequencys[currentButton];
                             GetComponent<DialController>().UpdateFrequency();
                         }
