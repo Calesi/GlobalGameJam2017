@@ -24,6 +24,7 @@ public class DialController : MonoBehaviour
     private readonly float volumeIncrement = 0.1f;
     private readonly float interferenceBase = 2.0f; //Must be >1; higher the number more sudden the audio fade
     private readonly float defaultMasterVol = 0.25f;
+    private readonly float percentStaticRand = 0.4f; //Larger means static volume is more randomised
 
     //Privates
     private float notchXPosition = -4.0f;
@@ -259,6 +260,13 @@ public class DialController : MonoBehaviour
         }
         //Set the static volume
         staticSource.volume = 1 * masterVolume - tempHeighestVolume;
+        staticSource.volume = randomiseStatic(staticSource.volume);
+    }
+    
+    private float randomiseStatic(float staticVol) {
+    	float randFloat = Convert.ToSingle(new System.Random().NextDouble());
+    	float newStaticVol = staticVol * (1.0f - percentStaticRand) + staticVol * percentStaticRand * randFloat;
+    	return newStaticVol;
     }
 
     private int ToFrequencyRange(StationController.bandwidth bandwidth)
