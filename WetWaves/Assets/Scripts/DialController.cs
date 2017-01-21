@@ -234,10 +234,11 @@ public class DialController : MonoBehaviour
     void UpdateAudio(int frequency)
     {
 
+    	float tempHeighestVolume = 0;
         for (int i = 0; i < stations.Length; i++)
         {
             var stationBandwidth = ToFrequencyRange(stations[i].stationBandwidth);
-            if (frequency > stations[i].frequency - stationBandwidth && frequency < stations[i].frequency + stationBandwidth) //Check if close to a radio station
+            if (Convert.ToSingle(Math.Abs(stations[i].frequency - frequency)) <= stationBandwidth) //Check if close to a radio station
             {
                 if (frequency == stations[i].frequency) //Are we right on the station
                 {
@@ -250,25 +251,17 @@ public class DialController : MonoBehaviour
                     float percentageModifier = fraction / outOf;
                     stations[i].GetSource().volume = (percentageModifier) * masterVolume;
                 }
+                if (stations[i].GetSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
+                {
+                    tempHeighestVolume = stations[i].GetSource().volume;
+                }
             }
             else
             {
                 //Not near a station
                 stations[i].GetSource().volume = 0.0f * masterVolume;
             }
-        }
-        float tempHeighestVolume = 0;
-        for (int i = 0; i < stations.Length; i++)
-        {
-
             print(string.Format("Current station volume: {0}", stations[i].GetSource().volume));
-            if (stations[i].GetSource().volume > 0)
-            {
-                if (stations[i].GetSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
-                {
-                    tempHeighestVolume = stations[i].GetSource().volume;
-                }
-            }
         }
         //Set the static volume
         staticSource.volume = 1 * masterVolume - tempHeighestVolume;
