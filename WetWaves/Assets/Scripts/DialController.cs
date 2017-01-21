@@ -10,6 +10,7 @@ public class DialController : MonoBehaviour
   public GameObject dialRight;
   public GameObject frequencyNotch;
   public Text frequencyText;
+  public float masterVolume = 0f;
 
   //Sounds
   public StationController[] stations;
@@ -20,6 +21,7 @@ public class DialController : MonoBehaviour
   private float notchXPosition = -4.0f;
   private float waitForHoldTimer = 0;
   private float tuneSpeed = 1;
+  private float volumeIncrement = 0.1f;
   public int currentFrequency;
 
   void Start()
@@ -31,7 +33,7 @@ public class DialController : MonoBehaviour
   {
     GetInput();
     UpdateAudio(currentFrequency);
-
+    UpdateFrequency();
   }
 
   void GetInput()
@@ -110,6 +112,41 @@ public class DialController : MonoBehaviour
     {
       waitForHoldTimer = 0;
     }
+
+    /* VOLUME CONTROL */
+    if (Input.GetKeyDown(KeyCode.W)) //Tapped
+    {
+      if (masterVolume <= 1.0f)
+      {
+        dialRight.transform.Rotate(new Vector3(0, 1, 0), -10, Space.Self);
+        masterVolume += volumeIncrement;
+      }
+      else
+      {
+        masterVolume = 1.0f;
+      }
+    }
+    else if (Input.GetKey(KeyCode.W)) //Held
+    {
+      if (masterVolume <= 1.0f)
+      {
+        //Wait a short delay to start fast tuning
+        waitForHoldTimer += Time.deltaTime;
+        if (waitForHoldTimer > 0.2f)
+        {
+          dialRight.transform.Rotate(new Vector3(0, 1, 0), -10, Space.Self);
+          masterVolume += (int)volumeIncrement;
+        }
+      }
+      else
+      {
+        masterVolume = 1.0f;
+      }
+    }
+    if (Input.GetKeyUp(KeyCode.W)) //Reset fast timer
+    {
+      waitForHoldTimer = 0;
+    }
   }
 
   public void UpdateFrequency()
@@ -126,27 +163,29 @@ public class DialController : MonoBehaviour
     //Calculate frequency into stations e.g. 459 = 45.9
     float actualFrequency = (float)currentFrequency;
     actualFrequency /= 10;
+    const int BASE_FREQUENCY = 80;
+    float displayFrequency = actualFrequency + BASE_FREQUENCY;
 
     //Keep the length of the string the same at all times
-    if (actualFrequency == 0)
+    if (actualFrequency > -0.05 && actualFrequency < 0.05)
     {
-      frequencyText.text = "00.0";
+      frequencyText.text = string.Format("{0}.0", BASE_FREQUENCY);
     }
-    else if (actualFrequency < 10 && actualFrequency == Mathf.FloorToInt(actualFrequency))
+    else if (displayFrequency < 10 && displayFrequency == Mathf.FloorToInt(displayFrequency))
     {
-      frequencyText.text = "0" + actualFrequency.ToString() + ".0";
+      frequencyText.text = "0" + displayFrequency.ToString() + ".0";
     }
-    else if (actualFrequency < 10)
+    else if (displayFrequency < 10)
     {
-      frequencyText.text = "0" + actualFrequency.ToString();
+      frequencyText.text = "0" + displayFrequency.ToString();
     }
-    else if (actualFrequency == Mathf.FloorToInt(actualFrequency))
+    else if (displayFrequency == Mathf.FloorToInt(displayFrequency))
     {
-      frequencyText.text = actualFrequency.ToString() + ".0";
+      frequencyText.text = displayFrequency.ToString() + ".0";
     }
     else
     {
-      frequencyText.text = actualFrequency.ToString();
+      frequencyText.text = displayFrequency.ToString();
     }
   }
 
@@ -155,33 +194,31 @@ public class DialController : MonoBehaviour
 
     for (int i = 0; i < stations.Length; i++)
     {
-      print(string.Format("frequency: {0}, sationFrequency: {1}", frequency, stations[i].frequency));
       var stationBandwidth = ToFrequencyRange(stations[i].stationBandwidth);
       if (frequency > stations[i].frequency - stationBandwidth && frequency < stations[i].frequency + stationBandwidth) //Check if close to a radio station
       {
         if (frequency == stations[i].frequency) //Are we right on the station
         {
-          print("full volume");
-          stations[i].GetSource().volume = 1;
+          stations[i].GetSource().volume = 1.0f * masterVolume;
         }
         else if (frequency > stations[i].frequency - stationBandwidth && frequency < stations[i].frequency)
         {
           switch (stations[i].frequency - frequency) //How close to the station are we?
           {
             case 1:
-            stations[i].GetSource().volume = 0.4f;
+            stations[i].GetSource().volume = 0.4f * masterVolume;
             break;
             case 2:
-            stations[i].GetSource().volume = 0.3f;
+            stations[i].GetSource().volume = 0.3f * masterVolume;
             break;
             case 3:
-            stations[i].GetSource().volume = 0.2f;
+            stations[i].GetSource().volume = 0.2f * masterVolume;
             break;
             case 4:
-            stations[i].GetSource().volume = 0.1f;
+            stations[i].GetSource().volume = 0.1f * masterVolume;
             break;
             default:
-            stations[i].GetSource().volume = 0.0f;
+            stations[i].GetSource().volume = 0.0f * masterVolume;
             break;
           }
         }
@@ -190,19 +227,19 @@ public class DialController : MonoBehaviour
           switch (frequency - stations[i].frequency)//How close to the station are we?
           {
             case 1:
-            stations[i].GetSource().volume = 0.4f;
+            stations[i].GetSource().volume = 0.4f * masterVolume;
             break;
             case 2:
-            stations[i].GetSource().volume = 0.3f;
+            stations[i].GetSource().volume = 0.3f * masterVolume;
             break;
             case 3:
-            stations[i].GetSource().volume = 0.2f;
+            stations[i].GetSource().volume = 0.2f * masterVolume;
             break;
             case 4:
-            stations[i].GetSource().volume = 0.1f;
+            stations[i].GetSource().volume = 0.1f * masterVolume;
             break;
             default:
-            stations[i].GetSource().volume = 0.0f;
+            stations[i].GetSource().volume = 0.0f * masterVolume;
             break;
           }
         }
@@ -210,7 +247,7 @@ public class DialController : MonoBehaviour
       else
       {
         //Not near a station
-        stations[i].GetSource().volume = 0.0f;
+        stations[i].GetSource().volume = 0.0f * masterVolume;
       }
     }
     float tempHeighestVolume = 0;
@@ -227,7 +264,7 @@ public class DialController : MonoBehaviour
       }
     }
     //Set the static volume
-    staticSource.volume = 1 - tempHeighestVolume;
+    staticSource.volume = 1  * masterVolume - tempHeighestVolume;
 
   }
 
