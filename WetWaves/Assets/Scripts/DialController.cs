@@ -219,16 +219,17 @@ public class DialController : MonoBehaviour
     		}
     	}
     }
-    
+
     public void UpdateFrequency()
     {
 
         //calculate correct notch position
         notchXPosition = currentFrequency;
-        notchXPosition /= 40;
-        notchXPosition *= 0.22f;
-        notchXPosition -= frequencyNotch.transform.position.x;
-        notchXPosition += transform.position.x;
+        notchXPosition /= 40; // Scale for some reason
+        notchXPosition *= 0.22f; // Max x position
+        notchXPosition *= (float) Math.Cos(transform.rotation.eulerAngles.y * Math.PI / 180); // Scale based on rotation
+        notchXPosition -= frequencyNotch.transform.position.x; // Relative to where we are now
+        notchXPosition += transform.position.x; // Relative to radio
         Vector3 pos = new Vector3(-notchXPosition, 0, 0);
         frequencyNotch.transform.Translate(pos);
 
