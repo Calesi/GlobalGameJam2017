@@ -1,247 +1,285 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DialController : MonoBehaviour
 {
-  //Publics
-  public GameObject dialLeft;
-  public GameObject dialRight;
-  public GameObject frequencyNotch;
-  public Text frequencyText;
+    //Publics
+    public GameObject dialLeft;
+    public GameObject dialRight;
+    public GameObject frequencyNotch;
+    public Text frequencyText;
+    public float masterVolume = 0f;
 
-  //Sounds
-  public StationController[] stations;
-  public AudioSource staticSource;
-  public AudioClip radioStatic;
+    //Sounds
+    public StationController[] stations;
+    public AudioSource staticSource;
+    public AudioClip radioStatic;
 
-  //Privates
-  private float notchXPosition = -4.0f;
-  private float waitForHoldTimer = 0;
-  private float tuneSpeed = 1;
-  public int currentFrequency;
+    //Constants
+    private readonly float interferenceBase = 2.0f;
 
-  void Start()
-  {
-    currentFrequency = 0;
-  }
+    //Privates
+    private float notchXPosition = -4.0f;
+    private float waitForHoldTimer = 0;
+    private float tuneSpeed = 1;
+    private float volumeIncrement = 0.1f;
+    public int currentFrequency;
 
-  void Update()
-  {
-    GetInput();
-    UpdateAudio(currentFrequency);
 
-  }
-
-  void GetInput()
-  {
-
-    //Check if single tap or held
-    if (Input.GetKeyDown(KeyCode.A)) //Tapped
+    void Start()
     {
-      if (currentFrequency >= 1)
-      {
-        dialLeft.transform.Rotate(new Vector3(0, 1, 0), tuneSpeed, Space.Self);
-        currentFrequency -= (int)tuneSpeed;
-      }
-      else
-      {
         currentFrequency = 0;
-      }
-      UpdateFrequency();
     }
-    else if (Input.GetKey(KeyCode.A)) //Held
+
+    void Update()
     {
-      if (currentFrequency >= 1)
-      {
-        //Wait a short delay to start fast tuning
-        waitForHoldTimer += Time.deltaTime;
-        if (waitForHoldTimer > 0.2f)
+        if (!TapeRecorder.instance.recording)
         {
-          dialLeft.transform.Rotate(new Vector3(0, 1, 0), tuneSpeed, Space.Self);
-          currentFrequency -= (int)tuneSpeed;
+            GetInput();
+            UpdateAudio(currentFrequency);
+            UpdateFrequency();
         }
-      }
-      else
-      {
-        currentFrequency = 0;
-      }
-      UpdateFrequency();
-    }
-    if (Input.GetKeyUp(KeyCode.A)) //Reset fast timer
-    {
-      waitForHoldTimer = 0;
+        
     }
 
-    //Check if single tap or held
-    if (Input.GetKeyDown(KeyCode.D)) //Tapped
+    void GetInput()
     {
-      if (currentFrequency <= 799)
-      {
-        dialLeft.transform.Rotate(new Vector3(0, 1, 0), -tuneSpeed, Space.Self);
-        currentFrequency += (int)tuneSpeed;
-      }
-      else
-      {
-        currentFrequency = 800;
-      }
-      UpdateFrequency();
-    }
-    else if (Input.GetKey(KeyCode.D)) //Held
-    {
-      if (currentFrequency <= 799)
-      {
-        //Wait a short delay to start fast tuning
-        waitForHoldTimer += Time.deltaTime;
-        if (waitForHoldTimer > 0.2f)
+
+        //Check if single tap or held
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) //Tapped
         {
-          dialLeft.transform.Rotate(new Vector3(0, 1, 0), -tuneSpeed, Space.Self);
-          currentFrequency += (int)tuneSpeed;
+            if (currentFrequency >= 1)
+            {
+                dialLeft.transform.Rotate(new Vector3(0, 1, 0), tuneSpeed, Space.Self);
+                currentFrequency -= (int)tuneSpeed;
+            }
+            else
+            {
+                currentFrequency = 0;
+            }
+            UpdateFrequency();
         }
-      }
-      else
-      {
-        currentFrequency = 800;
-      }
-      UpdateFrequency();
-    }
-    if (Input.GetKeyUp(KeyCode.D)) //Reset fast timer
-    {
-      waitForHoldTimer = 0;
-    }
-  }
-
-  public void UpdateFrequency()
-  {
-
-    //calculate correct notch position
-    notchXPosition = currentFrequency;
-    notchXPosition /= 100;
-    notchXPosition -= 4.0f;
-    notchXPosition -= frequencyNotch.transform.position.x;
-    Vector3 pos = new Vector3(notchXPosition, 0, 0);
-    frequencyNotch.transform.Translate(pos);
-
-    //Calculate frequency into stations e.g. 459 = 45.9
-    float actualFrequency = (float)currentFrequency;
-    actualFrequency /= 10;
-
-    //Keep the length of the string the same at all times
-    if (actualFrequency == 0)
-    {
-      frequencyText.text = "00.0";
-    }
-    else if (actualFrequency < 10 && actualFrequency == Mathf.FloorToInt(actualFrequency))
-    {
-      frequencyText.text = "0" + actualFrequency.ToString() + ".0";
-    }
-    else if (actualFrequency < 10)
-    {
-      frequencyText.text = "0" + actualFrequency.ToString();
-    }
-    else if (actualFrequency == Mathf.FloorToInt(actualFrequency))
-    {
-      frequencyText.text = actualFrequency.ToString() + ".0";
-    }
-    else
-    {
-      frequencyText.text = actualFrequency.ToString();
-    }
-  }
-
-  void UpdateAudio(int frequency)
-  {
-
-    for (int i = 0; i < stations.Length; i++)
-    {
-      print(string.Format("frequency: {0}, sationFrequency: {1}", frequency, stations[i].frequency));
-      var stationBandwidth = ToFrequencyRange(stations[i].stationBandwidth);
-      if (frequency > stations[i].frequency - stationBandwidth && frequency < stations[i].frequency + stationBandwidth) //Check if close to a radio station
-      {
-        if (frequency == stations[i].frequency) //Are we right on the station
+        else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) //Held
         {
-          print("full volume");
-          stations[i].GetSource().volume = 1;
+            if (currentFrequency >= 1)
+            {
+                //Wait a short delay to start fast tuning
+                waitForHoldTimer += Time.deltaTime;
+                if (waitForHoldTimer > 0.2f)
+                {
+                    dialLeft.transform.Rotate(new Vector3(0, 1, 0), tuneSpeed, Space.Self);
+                    currentFrequency -= (int)tuneSpeed;
+                }
+            }
+            else
+            {
+                currentFrequency = 0;
+            }
+            UpdateFrequency();
         }
-        else if (frequency > stations[i].frequency - stationBandwidth && frequency < stations[i].frequency)
+        if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)) //Reset fast timer
         {
-          switch (stations[i].frequency - frequency) //How close to the station are we?
-          {
-            case 1:
-            stations[i].GetSource().volume = 0.4f;
-            break;
-            case 2:
-            stations[i].GetSource().volume = 0.3f;
-            break;
-            case 3:
-            stations[i].GetSource().volume = 0.2f;
-            break;
-            case 4:
-            stations[i].GetSource().volume = 0.1f;
-            break;
-            default:
-            stations[i].GetSource().volume = 0.0f;
-            break;
-          }
+            waitForHoldTimer = 0;
+        }
+
+        //Check if single tap or held
+        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) //Tapped
+        {
+            if (currentFrequency <= 799)
+            {
+                dialLeft.transform.Rotate(new Vector3(0, 1, 0), -tuneSpeed, Space.Self);
+                currentFrequency += (int)tuneSpeed;
+            }
+            else
+            {
+                currentFrequency = 800;
+            }
+            UpdateFrequency();
+        }
+        else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) //Held
+        {
+            if (currentFrequency <= 799)
+            {
+                //Wait a short delay to start fast tuning
+                waitForHoldTimer += Time.deltaTime;
+                if (waitForHoldTimer > 0.2f)
+                {
+                    dialLeft.transform.Rotate(new Vector3(0, 1, 0), -tuneSpeed, Space.Self);
+                    currentFrequency += (int)tuneSpeed;
+                }
+            }
+            else
+            {
+                currentFrequency = 800;
+            }
+            UpdateFrequency();
+        }
+        if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)) //Reset fast timer
+        {
+            waitForHoldTimer = 0;
+        }
+
+        /* VOLUME CONTROL */
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) //Tapped
+        {
+            if (masterVolume <= 1.0f)
+            {
+                dialRight.transform.Rotate(new Vector3(0, 1, 0), -10, Space.Self);
+                masterVolume += volumeIncrement;
+            }
+            else
+            {
+                masterVolume = 1.0f;
+            }
+        }
+        else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) //Held
+        {
+            if (masterVolume <= 1.0f)
+            {
+                //Wait a short delay to start fast tuning
+                waitForHoldTimer += Time.deltaTime;
+                if (waitForHoldTimer > 0.2f)
+                {
+                    dialRight.transform.Rotate(new Vector3(0, 1, 0), -10, Space.Self);
+                    masterVolume += (int)volumeIncrement;
+                }
+            }
+            else
+            {
+                masterVolume = 1.0f;
+            }
+        }
+        if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow)) //Reset fast timer
+        {
+            waitForHoldTimer = 0;
+        }
+        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) //Tapped
+        {
+            if (masterVolume >= 0f)
+            {
+                dialRight.transform.Rotate(new Vector3(0, 1, 0), 10, Space.Self);
+                masterVolume -= volumeIncrement;
+            }
+            else
+            {
+                masterVolume = 0f;
+            }
+        }
+        else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) //Held
+        {
+            if (masterVolume >= 0f)
+            {
+                //Wait a short delay to start fast tuning
+                waitForHoldTimer += Time.deltaTime;
+                if (waitForHoldTimer > 0.2f)
+                {
+                    dialRight.transform.Rotate(new Vector3(0, 1, 0), 10, Space.Self);
+                    masterVolume -= (int)volumeIncrement;
+                }
+            }
+            else
+            {
+                masterVolume = 0f;
+            }
+        }
+        if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow)) //Reset fast timer
+        {
+            waitForHoldTimer = 0;
+        }
+    }
+
+    public void UpdateFrequency()
+    {
+
+        //calculate correct notch position
+        notchXPosition = currentFrequency;
+        notchXPosition /= 100;
+        notchXPosition -= 4.0f;
+        notchXPosition -= frequencyNotch.transform.position.x;
+        Vector3 pos = new Vector3(notchXPosition, 0, 0);
+        frequencyNotch.transform.Translate(pos);
+
+        //Calculate frequency into stations e.g. 459 = 45.9
+        float actualFrequency = (float)currentFrequency;
+        actualFrequency /= 10;
+        const int BASE_FREQUENCY = 80;
+        float displayFrequency = actualFrequency + BASE_FREQUENCY;
+
+        //Keep the length of the string the same at all times
+        if (actualFrequency > -0.05 && actualFrequency < 0.05)
+        {
+            frequencyText.text = string.Format("{0}.0", BASE_FREQUENCY);
+        }
+        else if (displayFrequency < 10 && displayFrequency == Mathf.FloorToInt(displayFrequency))
+        {
+            frequencyText.text = "0" + displayFrequency.ToString() + ".0";
+        }
+        else if (displayFrequency < 10)
+        {
+            frequencyText.text = "0" + displayFrequency.ToString();
+        }
+        else if (displayFrequency == Mathf.FloorToInt(displayFrequency))
+        {
+            frequencyText.text = displayFrequency.ToString() + ".0";
         }
         else
         {
-          switch (frequency - stations[i].frequency)//How close to the station are we?
-          {
-            case 1:
-            stations[i].GetSource().volume = 0.4f;
-            break;
-            case 2:
-            stations[i].GetSource().volume = 0.3f;
-            break;
-            case 3:
-            stations[i].GetSource().volume = 0.2f;
-            break;
-            case 4:
-            stations[i].GetSource().volume = 0.1f;
-            break;
-            default:
-            stations[i].GetSource().volume = 0.0f;
-            break;
-          }
+            frequencyText.text = displayFrequency.ToString();
         }
-      }
-      else
-      {
-        //Not near a station
-        stations[i].GetSource().volume = 0.0f;
-      }
     }
-    float tempHeighestVolume = 0;
-    for (int i = 0; i < stations.Length; i++)
+
+    void UpdateAudio(int frequency)
     {
 
-      print(string.Format("Current station volume: {0}", stations[i].GetSource().volume));
-      if(stations[i].GetSource().volume > 0)
-      {
-        if (stations[i].GetSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
+    	float tempHeighestVolume = 0;
+        for (int i = 0; i < stations.Length; i++)
         {
-          tempHeighestVolume = stations[i].GetSource().volume;
+            var stationBandwidth = ToFrequencyRange(stations[i].stationBandwidth);
+            if (Convert.ToSingle(Math.Abs(stations[i].frequency - frequency)) <= stationBandwidth) //Check if close to a radio station
+            {
+                if (frequency == stations[i].frequency) //Are we right on the station
+                {
+                    stations[i].GetSource().volume = 1.0f * masterVolume;
+                } else {
+        //          float baseModifier = 0.1f;
+                    float exponent = (stationBandwidth - Convert.ToSingle(Math.Abs(stations[i].frequency - frequency)));
+                    float fraction = Convert.ToSingle(Math.Pow(interferenceBase, exponent)) - 1.0f;
+                    float outOf = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth)) - 1.0f;
+                    float percentageModifier = fraction / outOf;
+                    stations[i].GetSource().volume = (percentageModifier) * masterVolume;
+                }
+                if (stations[i].GetSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
+                {
+                    tempHeighestVolume = stations[i].GetSource().volume;
+                }
+            }
+            else
+            {
+                //Not near a station
+                stations[i].GetSource().volume = 0.0f * masterVolume;
+            }
+            print(string.Format("Current station volume: {0}", stations[i].GetSource().volume));
         }
-      }
-    }
-    //Set the static volume
-    staticSource.volume = 1 - tempHeighestVolume;
+        //Set the static volume
+        staticSource.volume = 1 * masterVolume - tempHeighestVolume;
 
-  }
-
-  private int ToFrequencyRange(StationController.bandwidth bandwidth)
-  {
-    switch (bandwidth) {
-      case StationController.bandwidth.High:
-      return 5;
-      case StationController.bandwidth.Medium:
-      return 3;
-      case StationController.bandwidth.Low:
-      return 1;
-      default:
-      return 3;
     }
-  }
+
+    private int ToFrequencyRange(StationController.bandwidth bandwidth)
+    {
+        switch (bandwidth)
+        {
+            case StationController.bandwidth.High:
+                return 5;
+            case StationController.bandwidth.Medium:
+                return 3;
+            case StationController.bandwidth.Low:
+                return 1;
+            default:
+                return 3;
+        }
+    }
 }
