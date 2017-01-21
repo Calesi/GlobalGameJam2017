@@ -12,7 +12,7 @@ public class DialController : MonoBehaviour
     public GameObject frequencyNotch;
     public Text frequencyText;
     //public TextMesh frequencyText;
-    public float masterVolume = 0f;
+    public float masterVolume;
 
     //Sounds
     public StationController[] stations;
@@ -20,19 +20,24 @@ public class DialController : MonoBehaviour
     public AudioClip radioStatic;
 
     //Constants
-    private readonly float interferenceBase = 2.0f;
+    private readonly float tuneSpeed = 1;
+    private readonly float volumeIncrement = 0.1f;
+    private readonly float interferenceBase = 2.0f; //Must be >1; higher the number more sudden the audio fade
+    private readonly float defaultMasterVol = 0.25f;
+    private readonly float percentStaticRand = 0.4f; //Larger means static volume is more randomised
 
     //Privates
     private float notchXPosition = -4.0f;
     private float waitForHoldTimer = 0;
-    private float tuneSpeed = 1;
-    private float volumeIncrement = 0.1f;
     public int currentFrequency;
 
 
     void Start()
     {
         currentFrequency = 0;
+        masterVolume = defaultMasterVol;
+        staticSource.volume = defaultMasterVol;
+        frequencyText.text = "80.0";
     }
 
     void Update()
@@ -40,8 +45,6 @@ public class DialController : MonoBehaviour
         if (!TapeRecorder.instance.recording)
         {
             GetInput();
-            UpdateAudio(currentFrequency);
-            UpdateFrequency();
         }
         
     }
@@ -61,6 +64,7 @@ public class DialController : MonoBehaviour
             {
                 currentFrequency = 0;
             }
+            UpdateAudio(currentFrequency);
             UpdateFrequency();
             return;
         }
@@ -80,6 +84,7 @@ public class DialController : MonoBehaviour
             {
                 currentFrequency = 0;
             }
+            UpdateAudio(currentFrequency);
             UpdateFrequency();
             return;
         }
@@ -100,6 +105,7 @@ public class DialController : MonoBehaviour
             {
                 currentFrequency = 800;
             }
+            UpdateAudio(currentFrequency);
             UpdateFrequency();
             return;
         }
@@ -119,6 +125,7 @@ public class DialController : MonoBehaviour
             {
                 currentFrequency = 800;
             }
+            UpdateAudio(currentFrequency);
             UpdateFrequency();
             return;
         }
@@ -212,32 +219,12 @@ public class DialController : MonoBehaviour
         frequencyNotch.transform.Translate(pos);
 
         //Calculate frequency into stations e.g. 459 = 45.9
-        float actualFrequency = (float)currentFrequency;
-        actualFrequency /= 10;
+        float actualFrequency = (float)currentFrequency / 10.0f;
         const int BASE_FREQUENCY = 80;
         float displayFrequency = actualFrequency + BASE_FREQUENCY;
-
-        //Keep the length of the string the same at all times
-        if (actualFrequency > -0.05 && actualFrequency < 0.05)
-        {
-            frequencyText.text = string.Format("{0}.0", BASE_FREQUENCY);
-        }
-        else if (displayFrequency < 10 && displayFrequency == Mathf.FloorToInt(displayFrequency))
-        {
-            frequencyText.text = "0" + displayFrequency.ToString() + ".0";
-        }
-        else if (displayFrequency < 10)
-        {
-            frequencyText.text = "0" + displayFrequency.ToString();
-        }
-        else if (displayFrequency == Mathf.FloorToInt(displayFrequency))
-        {
-            frequencyText.text = displayFrequency.ToString() + ".0";
-        }
-        else
-        {
-            frequencyText.text = displayFrequency.ToString();
-        }
+        
+        //Display displayFrequency to 1 decimal place
+        frequencyText.text = displayFrequency.ToString("0.0");
     }
 
     void UpdateAudio(int frequency)
@@ -273,7 +260,13 @@ public class DialController : MonoBehaviour
         }
         //Set the static volume
         staticSource.volume = 1 * masterVolume - tempHeighestVolume;
-
+        staticSource.volume = randomiseStatic(staticSource.volume);
+    }
+    
+    private float randomiseStatic(float staticVol) {
+    	float randFloat = Convert.ToSingle(new System.Random().NextDouble());
+    	float newStaticVol = staticVol * (1.0f - percentStaticRand) + staticVol * percentStaticRand * randFloat;
+    	return newStaticVol;
     }
 
     private int ToFrequencyRange(StationController.bandwidth bandwidth)

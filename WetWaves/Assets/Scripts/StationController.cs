@@ -27,6 +27,7 @@ public class StationController : MonoBehaviour
     void Start()
     {
         source = GetComponent<AudioSource>();
+        source.volume = 0;
     }
 
     // Update is called once per frame
@@ -55,7 +56,7 @@ public class StationController : MonoBehaviour
                 currentClip = i + 1;
             }
         }
-        if (currentClip == stationClips.Length)
+        if (currentClip >= stationClips.Length)
         {
             currentClip = 0;
         }
