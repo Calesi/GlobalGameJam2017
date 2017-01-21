@@ -44,7 +44,7 @@ public class FrequencyButtons : MonoBehaviour {
                             currentButton = i;
                             buttons[currentButton].transform.Translate(new Vector3(0, 0, -0.150f));
                             GetComponent<DialController>().currentFrequency = buttonFrequencys[currentButton];
-                            GetComponent<DialController>().UpdateFrequency();
+                            GetComponent<DialController>().UpdateRadio(DialController.RadioEvent.StationChanged);
                         }
                     }
                 }
