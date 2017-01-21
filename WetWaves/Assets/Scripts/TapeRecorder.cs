@@ -14,22 +14,14 @@ public class TapeRecorder : MonoBehaviour
 
     [Header("Recording Components")]
     public AudioSource[] externalSources;
-    public List<AudioSource> sources = new List<AudioSource>();
-    public List<List<AudioClip>> sourceClips = new List<List<AudioClip>>();
-    public List<float> startingTimestamp = new List<float>();
-    public List<float> endingTimestamp = new List<float>();
-    public List<int> currentClips = new List<int>();
+    public AudioSource source;
+    public List<AudioClip> sourceClips = new List<AudioClip>();
+    public int currentClip = 0;
+    private float timestamp = 0;
 
     void Start()
     {
-        for (int i = 0; i < externalSources.Length; i++)
-        {
-            AudioSource newSource = gameObject.AddComponent<AudioSource>() as AudioSource;
-            sources.Add(newSource);
-            List<AudioClip> newClips = new List<AudioClip>();
-            sourceClips.Add(newClips);
-            currentClips.Add(0);
-        }
+        source = GetComponent<AudioSource>();
     }
 
     void Awake()
@@ -47,10 +39,6 @@ public class TapeRecorder : MonoBehaviour
     void Update()
     {
         CheckClicked();
-        if (recording)
-        {
-            Record();
-        }
         if (playing)
         {
             Playback();
@@ -59,41 +47,39 @@ public class TapeRecorder : MonoBehaviour
 
     void Playback()
     {
-
-        for (int i = 0; i < sources.Count; i++)
+        if (!source.isPlaying)
         {
-            if (!sources[i].isPlaying)
+            for (int i = 0; i < sourceClips.Count; i++)
             {
-
-                currentClips[i]++;
-                if (currentClips[i] == sourceClips[i].Count)
+                if (sourceClips[i] == source.clip)
                 {
-                    currentClips[i] = 0;
+                    currentClip = i + 1;
                 }
-                sources[i].clip = sourceClips[i][currentClips[i]];
-                sources[i].Play();
             }
+            if (currentClip == sourceClips.Count)
+            {
+                currentClip = 0;
+            }
+            source.clip = sourceClips[currentClip];
+            source.Play();
         }
     }
 
     void Record()
     {
+        int selectedStation = 0;
+        source.volume = 0;
         for (int i = 0; i < externalSources.Length; i++)
         {
-            if (sources[i].clip != externalSources[i].clip)
+            if(externalSources[i].volume > externalSources[selectedStation].volume)
             {
-                sources[i].clip = externalSources[i].clip;
-                Debug.Log(externalSources[i].clip.name);
-                sourceClips[i].Add(externalSources[i].clip);
+                selectedStation = i;
+                source.volume = externalSources[selectedStation].volume;
             }
-            if(i == 0)
-            {
-                //Set the starting time of the new source to match actual source
-                for (int j = 0; j < startingTimestamp.Count; j++)
-                {
-                    sources[j].time = startingTimestamp[j];
-                }                
-            }
+        }
+        for (int i = 0; i < externalSources[selectedStation].GetComponent<StationController>().stationClips.Length; i++)
+        {
+            sourceClips.Add(externalSources[selectedStation].GetComponent<StationController>().stationClips[i]);
         }
     }
 
@@ -117,66 +103,37 @@ public class TapeRecorder : MonoBehaviour
                             buttons[currentButton].transform.Translate(new Vector3(0, 0, 0.25f));
                             switch (currentButton)
                             {
-                                case 0: //Record
+                                case 0: //Record   
                                     playing = false;
-                                    recording = true;
-                                    //Started Recording, take note of starting times for each source
-                                    startingTimestamp.Clear();
+                                    timestamp = 0;
                                     for (int k = 0; k < sourceClips.Count; k++)
                                     {
-                                        sourceClips[k].Clear();
+                                        sourceClips.Clear();
                                     }
-                                    for (int j = 0; j < externalSources.Length; j++)
+                                    Record();
+                                    source.Stop();
+                                    break;
+                                case 1: //Play 
+                                    if (sourceClips.Count > 0)
                                     {
-                                        startingTimestamp.Add(externalSources[j].time);
-                                        sources[j].volume = externalSources[j].volume;
+                                        playing = true;
+                                        source.clip = sourceClips[currentClip];
+                                        source.Play();
+                                        source.time = timestamp;
                                     }
                                     break;
-                                case 1: //Play
-                                    for (int j = 0; j < sources.Count; j++)
-                                    {
-                                        sources[j].time = startingTimestamp[j];
-                                        sources[j].clip = sourceClips[j][0];
-                                        sources[j].Play();
-                                    }
-                                    endingTimestamp.Clear();
-                                    for (int l = 0; l < externalSources.Length; l++)
-                                    {
-                                        endingTimestamp.Add(externalSources[l].time);
-                                    }
-                                    playing = true;
-                                    recording = false;
-                                    break;
-                                case 2: //Reset
-                                    endingTimestamp.Clear();
-                                    for (int l = 0; l < externalSources.Length; l++)
-                                    {
-                                        endingTimestamp.Add(externalSources[l].time);
-                                        sources[l].volume = externalSources[l].volume;
-                                        sources[l].Stop();
-                                    }
-                                    startingTimestamp.Clear();
-                                    for (int k = 0; k < sourceClips.Count; k++)
-                                    {
-                                        sourceClips[k].Clear();
-                                    }
+                                case 2: //Pause
                                     playing = false;
-                                    recording = false;
+                                    currentClip = 0;
+                                    timestamp = source.time;
+                                    source.Stop();
                                     break;
-                                case 3: //Stop
-                                    endingTimestamp.Clear();
-                                    for (int l = 0; l < externalSources.Length; l++)
-                                    {
-                                        endingTimestamp.Add(externalSources[l].time);
-                                        sources[l].volume = externalSources[l].volume;
-                                        sources[l].Stop();
-                                    }
+                                case 3: //Rewind
                                     playing = false;
-                                    recording = false;
+                                    timestamp = 0;
+                                    source.Stop();
                                     break;
                                 default:
-                                    playing = false;
-                                    recording = false;
                                     break;
                             }
                         }
