@@ -9,6 +9,7 @@ public class Rotate : MonoBehaviour {
     Vector3 inspectPosition;
     Vector3 originalPosition;
     Quaternion originalRotation;
+    Behaviour halo;
     float step;
     bool forward = false;
 
@@ -27,7 +28,6 @@ public class Rotate : MonoBehaviour {
         }
         inspect();
     }
-
 
     void OnMouseDown()
     {
@@ -50,7 +50,6 @@ public class Rotate : MonoBehaviour {
         if (forward)
         {
             transform.position = Vector3.MoveTowards(transform.position, inspectPosition, step);
-
         }
         else
         {
