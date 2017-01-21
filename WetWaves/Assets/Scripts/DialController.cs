@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,12 +19,16 @@ public class DialController : MonoBehaviour
     public AudioSource staticSource;
     public AudioClip radioStatic;
 
+    //Constants
+    private readonly float interferenceBase = 2.0f;
+
     //Privates
     private float notchXPosition = -4.0f;
     private float waitForHoldTimer = 0;
     private float tuneSpeed = 1;
     private float volumeIncrement = 0.1f;
     public int currentFrequency;
+
 
     void Start()
     {
@@ -238,75 +243,32 @@ public class DialController : MonoBehaviour
     void UpdateAudio(int frequency)
     {
 
+    	float tempHeighestVolume = 0;
         for (int i = 0; i < stations.Length; i++)
         {
             var stationBandwidth = ToFrequencyRange(stations[i].stationBandwidth);
-            if (frequency > stations[i].frequency - stationBandwidth && frequency < stations[i].frequency + stationBandwidth) //Check if close to a radio station
+            if (Convert.ToSingle(Math.Abs(stations[i].frequency - frequency)) <= stationBandwidth) //Check if close to a radio station
             {
                 if (frequency == stations[i].frequency) //Are we right on the station
                 {
                     stations[i].GetSource().volume = 1.0f * masterVolume;
+                } else {
+        //          float baseModifier = 0.1f;
+                    float exponent = (stationBandwidth - Convert.ToSingle(Math.Abs(stations[i].frequency - frequency)));
+                    float fraction = Convert.ToSingle(Math.Pow(interferenceBase, exponent)) - 1.0f;
+                    float outOf = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth)) - 1.0f;
+                    float percentageModifier = fraction / outOf;
+                    stations[i].GetSource().volume = (percentageModifier) * masterVolume;
                 }
-                else if (frequency > stations[i].frequency - stationBandwidth && frequency < stations[i].frequency)
+                if (stations[i].GetSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
                 {
-                    switch (stations[i].frequency - frequency) //How close to the station are we?
-                    {
-                        case 1:
-                            stations[i].GetSource().volume = 0.4f * masterVolume;
-                            break;
-                        case 2:
-                            stations[i].GetSource().volume = 0.3f * masterVolume;
-                            break;
-                        case 3:
-                            stations[i].GetSource().volume = 0.2f * masterVolume;
-                            break;
-                        case 4:
-                            stations[i].GetSource().volume = 0.1f * masterVolume;
-                            break;
-                        default:
-                            stations[i].GetSource().volume = 0.0f * masterVolume;
-                            break;
-                    }
-                }
-                else
-                {
-                    switch (frequency - stations[i].frequency)//How close to the station are we?
-                    {
-                        case 1:
-                            stations[i].GetSource().volume = 0.4f * masterVolume;
-                            break;
-                        case 2:
-                            stations[i].GetSource().volume = 0.3f * masterVolume;
-                            break;
-                        case 3:
-                            stations[i].GetSource().volume = 0.2f * masterVolume;
-                            break;
-                        case 4:
-                            stations[i].GetSource().volume = 0.1f * masterVolume;
-                            break;
-                        default:
-                            stations[i].GetSource().volume = 0.0f * masterVolume;
-                            break;
-                    }
+                    tempHeighestVolume = stations[i].GetSource().volume;
                 }
             }
             else
             {
                 //Not near a station
                 stations[i].GetSource().volume = 0.0f * masterVolume;
-            }
-        }
-        float tempHeighestVolume = 0;
-        for (int i = 0; i < stations.Length; i++)
-        {
-
-            //print(string.Format("Current station volume: {0}", stations[i].GetSource().volume));
-            if (stations[i].GetSource().volume > 0)
-            {
-                if (stations[i].GetSource().volume > tempHeighestVolume) //Keep a value of the current highest volume station
-                {
-                    tempHeighestVolume = stations[i].GetSource().volume;
-                }
             }
         }
         //Set the static volume
