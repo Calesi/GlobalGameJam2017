@@ -27,6 +27,7 @@ public class StationController : MonoBehaviour
     void Start()
     {
         source = GetComponent<AudioSource>();
+        source.volume = 0;
     }
 
     // Update is called once per frame

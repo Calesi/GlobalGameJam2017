@@ -12,7 +12,7 @@ public class DialController : MonoBehaviour
     public GameObject frequencyNotch;
     public Text frequencyText;
     //public TextMesh frequencyText;
-    public float masterVolume = 0f;
+    public float masterVolume;
 
     //Sounds
     public StationController[] stations;
@@ -20,19 +20,23 @@ public class DialController : MonoBehaviour
     public AudioClip radioStatic;
 
     //Constants
+    private readonly float tuneSpeed = 1;
+    private readonly float volumeIncrement = 0.1f;
     private readonly float interferenceBase = 2.0f; //Must be >1; higher the number more sudden the audio fade
+    private readonly float defaultMasterVol = 0.25f;
 
     //Privates
     private float notchXPosition = -4.0f;
     private float waitForHoldTimer = 0;
-    private float tuneSpeed = 1;
-    private float volumeIncrement = 0.1f;
     public int currentFrequency;
 
 
     void Start()
     {
         currentFrequency = 0;
+        masterVolume = defaultMasterVol;
+        staticSource.volume = defaultMasterVol;
+        frequencyText.text = "80.0";
     }
 
     void Update()
@@ -255,7 +259,6 @@ public class DialController : MonoBehaviour
         }
         //Set the static volume
         staticSource.volume = 1 * masterVolume - tempHeighestVolume;
-        Debug.Log("123");
     }
 
     private int ToFrequencyRange(StationController.bandwidth bandwidth)
