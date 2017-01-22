@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class FadeIn : MonoBehaviour {
 
     public Image myPanel;
-    float fadeTime = 3f;
+    float fadeTime = 4f;
     Color colorToFadeTo;
 
     void Start()

@@ -183,6 +183,7 @@ RectTransform:
   - {fileID: 2116682337}
   - {fileID: 1731142627}
   - {fileID: 1857812254}
+  - {fileID: 272554406}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -607,6 +608,80 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 6d62e01d8e8c14aa1a057c0df6cfd26e, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &272554403
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 272554406}
+  - component: {fileID: 272554405}
+  - component: {fileID: 272554404}
+  m_Layer: 5
+  m_Name: Text
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &272554404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 272554403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 708705254, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 14
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 40
+    m_Alignment: 0
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: New Text
+--- !u!222 &272554405
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 272554403}
+--- !u!224 &272554406
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 272554403}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.0695188, y: 1.0695188, z: 1.0695188}
+  m_Children: []
+  m_Father: {fileID: 27423461}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -95.40109, y: -67.17526}
+  m_SizeDelta: {x: 200, y: 200}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!82 &276969575 stripped
 AudioSource:
   m_PrefabParentObject: {fileID: 82867755287271298, guid: 508e1d3812ff6442397d7c515853059c,
@@ -1439,6 +1514,7 @@ GameObject:
   - component: {fileID: 971271196}
   - component: {fileID: 971271195}
   - component: {fileID: 971271194}
+  - component: {fileID: 971271199}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1507,13 +1583,25 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 971271193}
-  m_LocalRotation: {x: 0.09332633, y: 0, z: 0, w: 0.99563557}
-  m_LocalPosition: {x: 5.83, y: 22.81, z: -25.75}
+  m_LocalRotation: {x: 0.19080894, y: 0, z: 0, w: 0.9816273}
+  m_LocalPosition: {x: 5.3, y: 24, z: -19}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 10.71, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 22, y: 0, z: 0}
+--- !u!114 &971271199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 971271193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 906dd25821561794d9518fd67dac7d3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  panSpeed: 30
 --- !u!82 &977433079 stripped
 AudioSource:
   m_PrefabParentObject: {fileID: 82073959393248754, guid: 6853894290f704098b19422a0b4b2bae,
@@ -3373,7 +3461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb693a94ad34acc4b9f429e92fbc9c50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textDisplayer: {fileID: 0}
+  textDisplayer: {fileID: 272554403}
 --- !u!114 &1857812256
 MonoBehaviour:
   m_ObjectHideFlags: 0

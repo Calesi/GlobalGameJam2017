@@ -14,40 +14,42 @@ public class RotatingCamera : MonoBehaviour {
 
 	void Update () {
         //Top
-        if (Input.mousePosition.y >= Screen.height - 10f)
+        if (Input.mousePosition.y >= Screen.height - 20f)
         {
-            // Minimum x rotation is 350 (like -10). Other value is due to 'overflow' when you go past zero.
+            // Minimum x rotation is 340 (like -20). Other value is due to 'overflow' when you go past zero.
             if (transform.rotation.eulerAngles.x < 340 || transform.rotation.eulerAngles.x > 350)
             {
                 gameObject.transform.Rotate(-20 * Time.deltaTime, 0, 0);
             }
         }
         //Bottom
-        if (Input.mousePosition.y <= 10f)
+        if (Input.mousePosition.y <= 20f)
         {
-            // Max x rotation is 10. Other value is due to 'overflow' when you go past zero.
-            if (transform.rotation.eulerAngles.x < 10 || transform.rotation.eulerAngles.x > 20)
+            // Max x rotation is 40. Other value is due to 'overflow' when you go past zero.
+            if (transform.rotation.eulerAngles.x < 40 || transform.rotation.eulerAngles.x > 50)
             {
                 gameObject.transform.Rotate(20 * Time.deltaTime, 0, 0);
             }
         }
         //Right
-        if (Input.mousePosition.x >= Screen.width - 10f)
+        if (Input.mousePosition.x >= Screen.width - 20f)
         {
-            // Max y rotation is 10. Other value is due to 'overflow' when you go past zero.
-            if (transform.rotation.eulerAngles.y < 10 || transform.rotation.eulerAngles.y > 20)
+            // Max y rotation is 20. Other value is due to 'overflow' when you go past zero.
+            if (transform.rotation.eulerAngles.y < 5 || transform.rotation.eulerAngles.y > 70)
             {
                 gameObject.transform.Rotate(0, 20 * Time.deltaTime, 0);
             }
         }
         //Left
-        if (Input.mousePosition.x <= 10f)
+        if (Input.mousePosition.x <= 20f)
         {
-            // Minimum y rotation is 350 (like -10). Other value is due to 'overflow' when you go past zero.
-            if (transform.rotation.eulerAngles.y < 340 || transform.rotation.eulerAngles.y > 350)
+            // Minimum y rotation is 340 (like -20). Other value is due to 'overflow' when you go past zero.
+            if (transform.rotation.eulerAngles.y < 335 || transform.rotation.eulerAngles.y > 348)
             {
-                gameObject.transform.Rotate(0, 20 * Time.deltaTime, 0);
+                gameObject.transform.Rotate(0, -20 * Time.deltaTime, 0);
             }
-        } 
+        }
+        Quaternion rot = Quaternion.Euler(gameObject.transform.eulerAngles.x, gameObject.transform.eulerAngles.y, 0);
+        gameObject.transform.rotation = rot;
     }
 }
