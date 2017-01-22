@@ -9,5 +9,6 @@ public class Notebook : MonoBehaviour {
     {
         // Display text input field and piece of note paper
         textfield.SetActive(true);
+        BackgroundSoundsController.instance.PaperPickUp();
     }
 }

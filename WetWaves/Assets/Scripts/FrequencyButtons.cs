@@ -10,19 +10,13 @@ public class FrequencyButtons : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        for (int i = 0; i < buttonFrequencys.Length; i++)
-        {
-            buttonFrequencys[i] = 0;
-        }
+        
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        if (!TapeRecorder.instance.recording)
-        {
             CheckClicked();
             SetButtonFrequency();
-        }
 	}
 
     void CheckClicked()
@@ -45,11 +39,39 @@ public class FrequencyButtons : MonoBehaviour {
                             buttons[currentButton].transform.Translate(new Vector3(0, 0, -0.150f));
                             GetComponent<DialController>().currentFrequency = buttonFrequencys[currentButton];
                             GetComponent<DialController>().UpdateRadio(DialController.RadioEvent.StationChanged);
+                            BackgroundSoundsController.instance.ButtonClick();
                         }
                     }
                 }
 
             }
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            buttons[currentButton].transform.Translate(new Vector3(0, 0, 0.150f));
+            currentButton = 0;
+            buttons[currentButton].transform.Translate(new Vector3(0, 0, -0.150f));
+            GetComponent<DialController>().currentFrequency = buttonFrequencys[currentButton];
+            GetComponent<DialController>().UpdateRadio(DialController.RadioEvent.StationChanged);
+            BackgroundSoundsController.instance.ButtonClick();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            buttons[currentButton].transform.Translate(new Vector3(0, 0, 0.150f));
+            currentButton = 1;
+            buttons[currentButton].transform.Translate(new Vector3(0, 0, -0.150f));
+            GetComponent<DialController>().currentFrequency = buttonFrequencys[currentButton];
+            GetComponent<DialController>().UpdateRadio(DialController.RadioEvent.StationChanged);
+            BackgroundSoundsController.instance.ButtonClick();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            buttons[currentButton].transform.Translate(new Vector3(0, 0, 0.150f));
+            currentButton = 2;
+            buttons[currentButton].transform.Translate(new Vector3(0, 0, -0.150f));
+            GetComponent<DialController>().currentFrequency = buttonFrequencys[currentButton];
+            GetComponent<DialController>().UpdateRadio(DialController.RadioEvent.StationChanged);
+            BackgroundSoundsController.instance.ButtonClick();
         }
     }
 

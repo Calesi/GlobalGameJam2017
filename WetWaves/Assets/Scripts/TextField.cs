@@ -21,5 +21,6 @@ public class TextField : MonoBehaviour {
         currentText = currentText + "\n" +  newText;
         textDisplayer.GetComponent<Text>().text = currentText;
         gameObject.SetActive(false);
+        BackgroundSoundsController.instance.PaperPutDown();
     }    
 }

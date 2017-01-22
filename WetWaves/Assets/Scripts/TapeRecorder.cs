@@ -7,6 +7,7 @@ public class TapeRecorder : MonoBehaviour
 
     public static TapeRecorder instance;
 
+    public bool recording = false;
     private bool playing = false;
     public GameObject[] buttons;
     private int currentButton = 3;
@@ -96,7 +97,10 @@ public class TapeRecorder : MonoBehaviour
                 {
                     for (int i = 0; i < buttons.Length; i++)
                     {
-                        
+                        if (currentButton != i || playing == true)
+                        {
+                            BackgroundSoundsController.instance.ButtonClick();
+                        }
                         if (buttons[i] == objectHit)
                         {
                             if (currentButton < 4)
@@ -165,8 +169,10 @@ public class TapeRecorder : MonoBehaviour
                                 default:
                                     break;
                             }
+                            
                             currentButton = i;
                             buttons[currentButton].transform.Translate(new Vector3(0, -0.075f, 0));
+                            
                         }
                     }
                 }
