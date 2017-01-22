@@ -25,7 +25,7 @@ public class DialController : MonoBehaviour
     private readonly float volumeIncrement = 0.1f;
     private readonly float interferenceBase = 2.0f; //Must be >1; lower the number more sudden the audio fade
     private readonly float defaultMasterVol = 0.25f;
-    private readonly float percentStaticRand = 0.2f; //Larger means static volume is more randomised
+    private readonly float percentStaticRand = 0.4f; //Larger means static volume is more randomised
     private readonly float minStaticAugendVol = 0.05f; //Minimum static volume
 
     //Privates
@@ -272,12 +272,7 @@ public class DialController : MonoBehaviour
     
     private float setStationVol (StationController station, int rawFrequency) {
     	var stationBandwidth = ToFrequencyRange(station.stationBandwidth);
-//        float baseModifier = 0.1f;
 		float percentageModifier = percentageVolFunc(stationBandwidth, station.frequency, rawFrequency, false);
-//        float exponent = (stationBandwidth - Convert.ToSingle(Math.Abs(station.frequency - rawFrequency)));
-//        float fraction = Convert.ToSingle(Math.Pow(interferenceBase, exponent)) - 1.0f;
-//        float outOf = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth)) - 1.0f;
-//        float percentageModifier = fraction / outOf;
         return percentageModifier * masterVolume;
     }
     
@@ -286,10 +281,6 @@ public class DialController : MonoBehaviour
 		if (currentLoudestStation != null) {
 	    	var stationBandwidth = ToFrequencyRange(currentLoudestStation.stationBandwidth);
 	    	percentageModifier = percentageVolFunc(stationBandwidth, currentLoudestStation.frequency, currentFrequency, true);
-//	        float exponent = (stationBandwidth - Convert.ToSingle(Math.Abs(currentLoudestStation.frequency - currentFrequency)));
-//	        float fraction = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth - exponent)) - 1.0f;
-//	        float outOf = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth)) - 1.0f;
-//	        percentageModifier = fraction / outOf;
 		}
         staticSource.volume = randomiseStaticVol(masterVolume * staticVolModifier * percentageModifier);
         return Math.Min(masterVolume * staticVolModifier, minStaticAugendVol * masterVolume + staticSource.volume);;
