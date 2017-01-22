@@ -18,11 +18,11 @@ public class FrequencyButtons : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (!TapeRecorder.instance.recording)
-        {
-            CheckClicked();
-            SetButtonFrequency();
-        }
+        //if (!TapeRecorder.instance.recording)
+        //{
+        //    CheckClicked();
+        //    SetButtonFrequency();
+        //}
 	}
 
     void CheckClicked()
