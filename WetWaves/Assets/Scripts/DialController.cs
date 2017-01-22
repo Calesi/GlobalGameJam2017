@@ -23,9 +23,10 @@ public class DialController : MonoBehaviour
     //Constants
     private readonly float tuneSpeed = 1;
     private readonly float volumeIncrement = 0.1f;
-    private readonly float interferenceBase = 2.0f; //Must be >1; higher the number more sudden the audio fade
+    private readonly float interferenceBase = 2.0f; //Must be >1; lower the number more sudden the audio fade
     private readonly float defaultMasterVol = 0.25f;
     private readonly float percentStaticRand = 0.4f; //Larger means static volume is more randomised
+    private readonly float minStaticAugendVol = 0.05f; //Minimum static volume
 
     //Privates
     private float staticVolModifier = 0.7f;
@@ -201,21 +202,18 @@ public class DialController : MonoBehaviour
 
     public void UpdateRadio(RadioEvent eventType)
     {
-        if (eventType != RadioEvent.None)
-        {
-            UpdateFrequency();
-            switch (eventType)
-            {
-                case RadioEvent.StationChanged:
-                    float tempHeighestVolume = UpdateAudio();
-                    staticSource.volume = setStaticVol(tempHeighestVolume);
-                    staticSource.volume = randomiseStaticVol(staticSource.volume);
-                    break;
-                case RadioEvent.VolumeChanged:
-                    UpdateAudio();
-                    break;
-            }
-        }
+    	if (eventType != RadioEvent.None) {
+    		UpdateFrequency();
+    		switch (eventType) {
+    			case RadioEvent.StationChanged:
+    				StationController currentLoudestStation = UpdateAudio();
+		    		staticSource.volume = setStaticVol(currentLoudestStation);
+		            break;
+	           case RadioEvent.VolumeChanged:
+		           UpdateAudio();
+		           break;
+    		}
+    	}
     }
 
     public void UpdateFrequency()
@@ -240,65 +238,61 @@ public class DialController : MonoBehaviour
         frequencyText.text = displayFrequency.ToString("0.0");
     }
 
-    float UpdateAudio()
+    StationController UpdateAudio()
     {
-
-        float tempHeighestVolume = 0;
-        AnimatedTexture.instance.rowToAnimate = 2;
-        for (int i = 0; i < stations.Length; i++)
+    	StationController currentLoudestStation = null;
+            AnimatedTexture.instance.rowToAnimate = 2;
+            for (int i = 0; i < stations.Length; i++)
         {
-            if (stations[i] != null && stations[i].GetComponent<AudioSource>() != null)
-            {
-                if (Convert.ToSingle(Math.Abs(stations[i].frequency - currentFrequency)) <= ToFrequencyRange(stations[i].stationBandwidth)) //Check if close to a radio station
-                {
-                    if (currentFrequency == stations[i].frequency) //Are we right on the station
-                    {
-                        AnimatedTexture.instance.rowToAnimate = 0;
-                        stations[i].GetComponent<AudioSource>().volume = 1.0f * masterVolume;
-                    }
-                    else
-                    {
-                        //	                    stations[i].GetSource().volume = setStationVol(stations[i], currentFrequency);
-                        stations[i].GetComponent<AudioSource>().volume = setStationVol(stations[i], currentFrequency);
+        	if (stations[i] != null && stations[i].GetComponent<AudioSource>() != null) {
+	            if (Convert.ToSingle(Math.Abs(stations[i].frequency - currentFrequency)) <= ToFrequencyRange(stations[i].stationBandwidth)) //Check if close to a radio station
+	            {
+	                if (currentFrequency == stations[i].frequency) //Are we right on the station
+	                {
+                            AnimatedTexture.instance.rowToAnimate = 0;
+                            stations[i].GetComponent<AudioSource>().volume = 1.0f * masterVolume;
+	                } else {
+//	                    stations[i].GetSource().volume = setStationVol(stations[i], currentFrequency);
+	                    stations[i].GetComponent<AudioSource>().volume = setStationVol(stations[i], currentFrequency);
                         if (AnimatedTexture.instance.rowToAnimate != 0)
                         {
                             AnimatedTexture.instance.rowToAnimate = 1;
                         }
-                    }
-                    if (stations[i].GetComponent<AudioSource>().volume > tempHeighestVolume) //Keep a value of the current highest volume station
-                    {
-                        tempHeighestVolume = stations[i].GetComponent<AudioSource>().volume;
-
-                    }
-                }
-                else
-                {
-                    //Not near a station
-                    stations[i].GetComponent<AudioSource>().volume = 0.0f * masterVolume;
+                        }
+	                if (currentLoudestStation == null
+	                    	|| stations[i].GetComponent<AudioSource>().volume > currentLoudestStation.GetComponent<AudioSource>().volume) //Keep a value of the current highest volume station
+	                {
+	                    currentLoudestStation = stations[i];
+	                }
+	            }
+	            else
+	            {
+	                //Not near a station
+                	stations[i].GetComponent<AudioSource>().volume = 0.0f * masterVolume;
                     if (AnimatedTexture.instance.rowToAnimate > 1)
                     {
                         AnimatedTexture.instance.rowToAnimate = 2;
                     }
-                }
-            }
+                    }
+        	}
         }
-        return tempHeighestVolume;
+        return currentLoudestStation;
     }
-
-    private float setStationVol(StationController station, int rawFrequency)
-    {
-        var stationBandwidth = ToFrequencyRange(station.stationBandwidth);
-        //        float baseModifier = 0.1f;
-        float exponent = (stationBandwidth - Convert.ToSingle(Math.Abs(station.frequency - rawFrequency)));
-        float fraction = Convert.ToSingle(Math.Pow(interferenceBase, exponent)) - 1.0f;
-        float outOf = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth)) - 1.0f;
-        float percentageModifier = fraction / outOf;
+    
+    private float setStationVol (StationController station, int rawFrequency) {
+    	var stationBandwidth = ToFrequencyRange(station.stationBandwidth);
+		float percentageModifier = percentageVolFunc(stationBandwidth, station.frequency, rawFrequency, false);
         return percentageModifier * masterVolume;
     }
-
-    private float setStaticVol(float vol)
-    {
-        return staticSource.volume = staticVolModifier * (masterVolume - vol);
+    
+    private float setStaticVol(StationController currentLoudestStation) {
+		float percentageModifier = 1.0f;
+		if (currentLoudestStation != null) {
+	    	var stationBandwidth = ToFrequencyRange(currentLoudestStation.stationBandwidth);
+	    	percentageModifier = percentageVolFunc(stationBandwidth, currentLoudestStation.frequency, currentFrequency, true);
+		}
+        staticSource.volume = randomiseStaticVol(masterVolume * staticVolModifier * percentageModifier);
+        return Math.Min(masterVolume * staticVolModifier, minStaticAugendVol * masterVolume + staticSource.volume);
     }
 
     private float randomiseStaticVol(float staticVol)
@@ -306,6 +300,24 @@ public class DialController : MonoBehaviour
         float randFloat = Convert.ToSingle(new System.Random().NextDouble());
         float newStaticVol = staticVol * (1.0f - percentStaticRand) + staticVol * percentStaticRand * randFloat;
         return newStaticVol;
+    }
+    
+    /**
+     * This method applies a function on an exponent value (which represents how close x1 is to x2),
+     * to calculate a "y" of this function, and then finally returns the fraction of "y" out of the
+     * maximum possible "y" value
+     * 
+     */
+    private float percentageVolFunc(int maxExponent, int x1, int x2, Boolean inverted) {
+    	float offset = Convert.ToSingle(Math.Pow(interferenceBase, 0));
+    	float exponent = maxExponent - Convert.ToSingle(Math.Abs(x1 - x2));
+    	if (inverted) {
+    		exponent = maxExponent - exponent;
+    	}
+        float y = Convert.ToSingle(Math.Pow(interferenceBase, exponent)) - offset;
+        float maxY = Convert.ToSingle(Math.Pow(interferenceBase, maxExponent)) - offset;
+        float percentageModifier = y / maxY;
+    	return percentageModifier;
     }
 
     private int ToFrequencyRange(StationController.bandwidth bandwidth)
