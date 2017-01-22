@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class DialController : MonoBehaviour
 {
     //Publics
-    public enum RadioEvent {None, StationChanged, VolumeChanged};
+    public enum RadioEvent { None, StationChanged, VolumeChanged };
     public GameObject dialLeft;
     public GameObject dialRight;
     public GameObject frequencyNotch;
@@ -43,9 +43,9 @@ public class DialController : MonoBehaviour
 
     void Update()
     {
-    	RadioEvent eventType = GetInput();
-    	UpdateRadio(eventType);
-        
+        RadioEvent eventType = GetInput();
+        UpdateRadio(eventType);
+
     }
 
     RadioEvent GetInput()
@@ -198,22 +198,24 @@ public class DialController : MonoBehaviour
         }
         return RadioEvent.None;
     }
-    
+
     public void UpdateRadio(RadioEvent eventType)
     {
-    	if (eventType != RadioEvent.None) {
-    		UpdateFrequency();
-    		switch (eventType) {
-    			case RadioEvent.StationChanged:
-    				float tempHeighestVolume = UpdateAudio();
-		    		staticSource.volume = setStaticVol(tempHeighestVolume);
-		            staticSource.volume = randomiseStaticVol(staticSource.volume);
-		            break;
-	           case RadioEvent.VolumeChanged:
-		           UpdateAudio();
-		           break;
-    		}
-    	}
+        if (eventType != RadioEvent.None)
+        {
+            UpdateFrequency();
+            switch (eventType)
+            {
+                case RadioEvent.StationChanged:
+                    float tempHeighestVolume = UpdateAudio();
+                    staticSource.volume = setStaticVol(tempHeighestVolume);
+                    staticSource.volume = randomiseStaticVol(staticSource.volume);
+                    break;
+                case RadioEvent.VolumeChanged:
+                    UpdateAudio();
+                    break;
+            }
+        }
     }
 
     public void UpdateFrequency()
@@ -223,7 +225,7 @@ public class DialController : MonoBehaviour
         notchXPosition = currentFrequency;
         notchXPosition /= 40; // Scale for some reason
         notchXPosition *= 0.22f; // Max x position
-        notchXPosition *= (float) Math.Cos(transform.rotation.eulerAngles.y * Math.PI / 180); // Scale based on rotation
+        notchXPosition *= (float)Math.Cos(transform.rotation.eulerAngles.y * Math.PI / 180); // Scale based on rotation
         notchXPosition -= frequencyNotch.transform.position.x; // Relative to where we are now
         notchXPosition += transform.position.x; // Relative to radio
         Vector3 pos = new Vector3(-notchXPosition, 0, 0);
@@ -233,7 +235,7 @@ public class DialController : MonoBehaviour
         float actualFrequency = (float)currentFrequency / 10.0f;
         const int BASE_FREQUENCY = 80;
         float displayFrequency = actualFrequency + BASE_FREQUENCY;
-        
+
         //Display displayFrequency to 1 decimal place
         frequencyText.text = displayFrequency.ToString("0.0");
     }
@@ -241,52 +243,69 @@ public class DialController : MonoBehaviour
     float UpdateAudio()
     {
 
-    	float tempHeighestVolume = 0;
+        float tempHeighestVolume = 0;
+        AnimatedTexture.instance.rowToAnimate = 2;
         for (int i = 0; i < stations.Length; i++)
         {
-        	if (stations[i] != null && stations[i].GetComponent<AudioSource>() != null) {
-	            if (Convert.ToSingle(Math.Abs(stations[i].frequency - currentFrequency)) <= ToFrequencyRange(stations[i].stationBandwidth)) //Check if close to a radio station
-	            {
-	                if (currentFrequency == stations[i].frequency) //Are we right on the station
-	                {
-	                    stations[i].GetComponent<AudioSource>().volume = 1.0f * masterVolume;
-	                } else {
-//	                    stations[i].GetSource().volume = setStationVol(stations[i], currentFrequency);
-	                    stations[i].GetComponent<AudioSource>().volume = setStationVol(stations[i], currentFrequency);
-	                }
-	                if (stations[i].GetComponent<AudioSource>().volume > tempHeighestVolume) //Keep a value of the current highest volume station
-	                {
-	                    tempHeighestVolume = stations[i].GetComponent<AudioSource>().volume;
-	                }
-	            }
-	            else
-	            {
-	                //Not near a station
-                	stations[i].GetComponent<AudioSource>().volume = 0.0f * masterVolume;
-	            }
-        	}
+            if (stations[i] != null && stations[i].GetComponent<AudioSource>() != null)
+            {
+                if (Convert.ToSingle(Math.Abs(stations[i].frequency - currentFrequency)) <= ToFrequencyRange(stations[i].stationBandwidth)) //Check if close to a radio station
+                {
+                    if (currentFrequency == stations[i].frequency) //Are we right on the station
+                    {
+                        AnimatedTexture.instance.rowToAnimate = 0;
+                        stations[i].GetComponent<AudioSource>().volume = 1.0f * masterVolume;
+                    }
+                    else
+                    {
+                        //	                    stations[i].GetSource().volume = setStationVol(stations[i], currentFrequency);
+                        stations[i].GetComponent<AudioSource>().volume = setStationVol(stations[i], currentFrequency);
+                        if (AnimatedTexture.instance.rowToAnimate != 0)
+                        {
+                            AnimatedTexture.instance.rowToAnimate = 1;
+                        }
+                    }
+                    if (stations[i].GetComponent<AudioSource>().volume > tempHeighestVolume) //Keep a value of the current highest volume station
+                    {
+                        tempHeighestVolume = stations[i].GetComponent<AudioSource>().volume;
+
+                    }
+                }
+                else
+                {
+                    //Not near a station
+                    stations[i].GetComponent<AudioSource>().volume = 0.0f * masterVolume;
+                    if (AnimatedTexture.instance.rowToAnimate > 1)
+                    {
+                        AnimatedTexture.instance.rowToAnimate = 2;
+                    }
+                }
+            }
         }
         return tempHeighestVolume;
     }
-    
-    private float setStationVol (StationController station, int rawFrequency) {
-    	var stationBandwidth = ToFrequencyRange(station.stationBandwidth);
-//        float baseModifier = 0.1f;
+
+    private float setStationVol(StationController station, int rawFrequency)
+    {
+        var stationBandwidth = ToFrequencyRange(station.stationBandwidth);
+        //        float baseModifier = 0.1f;
         float exponent = (stationBandwidth - Convert.ToSingle(Math.Abs(station.frequency - rawFrequency)));
         float fraction = Convert.ToSingle(Math.Pow(interferenceBase, exponent)) - 1.0f;
         float outOf = Convert.ToSingle(Math.Pow(interferenceBase, stationBandwidth)) - 1.0f;
         float percentageModifier = fraction / outOf;
         return percentageModifier * masterVolume;
     }
-    
-    private float setStaticVol(float vol) {
-    	return staticSource.volume = staticVolModifier * (masterVolume - vol);
+
+    private float setStaticVol(float vol)
+    {
+        return staticSource.volume = staticVolModifier * (masterVolume - vol);
     }
-    
-    private float randomiseStaticVol(float staticVol) {
-    	float randFloat = Convert.ToSingle(new System.Random().NextDouble());
-    	float newStaticVol = staticVol * (1.0f - percentStaticRand) + staticVol * percentStaticRand * randFloat;
-    	return newStaticVol;
+
+    private float randomiseStaticVol(float staticVol)
+    {
+        float randFloat = Convert.ToSingle(new System.Random().NextDouble());
+        float newStaticVol = staticVol * (1.0f - percentStaticRand) + staticVol * percentStaticRand * randFloat;
+        return newStaticVol;
     }
 
     private int ToFrequencyRange(StationController.bandwidth bandwidth)
